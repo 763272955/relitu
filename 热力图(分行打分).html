@@ -1,0 +1,215 @@
+<html>
+<head>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<meta http-equiv="Content-Type" content="text/html; charset=utf8">
+	<style type="text/css">
+		html,body{height:100%;margin:0px;padding:0px;font-family:"微软雅黑";font-size:14px;}
+		#allmap{height:700px;width:100%;}
+		.optionpanel{margin: 10px;}
+		#r-result{width:100%;}
+		#r-result p{margin:5px 0 0 10px;}
+	</style>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=IvympObr4rMUzdGjHjZjmQU1rfVPq86E"></script>
+	
+	<script type="text/javascript" src="http://api.map.baidu.com/library/Heatmap/2.0/src/Heatmap_min.js"></script>
+	
+	<script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+	<title>个性底图设置模板Demo页</title>
+</head>
+
+
+
+
+<body>
+	<div id="allmap"></div>
+	<div id="r-result">
+		<div class="optionpanel">
+			<label>选择主题</label>
+			<select id="stylelist" onchange="changeMapStyle(this.value)"></select>
+		</div>
+		<p>查看详细信息请参考<a href='http://lbsyun.baidu.com/custom/list.htm' target="_blank">个性模板列表页</a></p>
+	</div>   
+	<div id="container"></div>
+	<div id="r-result">
+		<input type="button"  onclick="openHeatmap();" value="显示热力图"/><input type="button"  onclick="closeHeatmap();" value="关闭热力图"/>
+	</div>
+</body>
+</html>
+
+<script type="text/javascript" src="http://lbsyun.baidu.com/custom/stylelist.js"></script>
+<script type="text/javascript">
+
+
+
+
+	//初始化模板选择的下拉框
+	var sel = document.getElementById('stylelist');
+	for(var key in mapstyles){
+		var style = mapstyles[key];
+		var item = new  Option(style.title,key);
+		sel.options.add(item);
+	}
+	var map = new BMap.Map("allmap");
+	window.map = map;
+	var point = new BMap.Point(116.404, 39.915);
+
+	map.addControl(new BMap.NavigationControl());               // 添加平移缩放控件
+	map.addControl(new BMap.ScaleControl());                    // 添加比例尺控件
+	map.addControl(new BMap.OverviewMapControl());              //添加缩略地图控件
+	map.enableScrollWheelZoom();                            //启用滚轮放大缩小
+	map.addControl(new BMap.MapTypeControl());          //添加地图类型控件
+	map.disable3DBuilding();
+	map.centerAndZoom(point, 14); 
+
+	//代码使用如下,即可. 模板页可以查看http://lbsyun.baidu.com/custom/list.htm      
+	//map.setMapStyle({style:'midnight'});
+
+	changeMapStyle('midnight')
+	sel.value = 'midnight';
+	var points =[
+{"lat":34.235673,"lng":108.936844,"count":98}, 
+{"lat":36.105215,"lng":120.384428,"count":97}, 
+{"lat":26.629907,"lng":106.709177,"count":99}, 
+{"lat":24.489231,"lng":118.103886,"count":98}, 
+{"lat":43.84038,"lng":87.564988,"count":100}, 
+{"lat":26.047125,"lng":119.330221,"count":94}, 
+{"lat":22.806493,"lng":108.297234,"count":97}, 
+{"lat":38.94871,"lng":121.593478,"count":97}, 
+{"lat":43.898338,"lng":125.313642,"count":100}, 
+{"lat":36.682785,"lng":117.024967,"count":99}, 
+{"lat":37.890277,"lng":112.550864,"count":96}, 
+{"lat":30.581084,"lng":114.3162,"count":96}, 
+{"lat":40.828319,"lng":111.660351,"count":100}, 
+{"lat":20.022071,"lng":110.330802,"count":97}, 
+{"lat":36.640739,"lng":101.767921,"count":100}, 
+{"lat":29.544606,"lng":106.530635,"count":94}, 
+{"lat":25.049153,"lng":102.714601,"count":98}, 
+{"lat":39.929986,"lng":116.395645,"count":93}, 
+{"lat":34.75661,"lng":113.649644,"count":95}, 
+{"lat":23.120049,"lng":113.30765,"count":87}, 
+{"lat":31.570037,"lng":120.305456,"count":99}, 
+{"lat":37.536562,"lng":121.309555,"count":98}, 
+{"lat":36.064226,"lng":103.823305,"count":100}, 
+{"lat":31.317987,"lng":120.619907,"count":98}, 
+{"lat":31.866942,"lng":117.282699,"count":93}, 
+{"lat":39.14393,"lng":117.210813,"count":97}, 
+{"lat":41.808645,"lng":123.432791,"count":95}, 
+{"lat":38.048958,"lng":114.522082,"count":96}, 
+{"lat":28.689578,"lng":115.893528,"count":98}, 
+{"lat":47.356592,"lng":128.047414,"count":100}, 
+{"lat":29.885259,"lng":121.579006,"count":99}, 
+{"lat":30.679943,"lng":104.067923,"count":98}, 
+{"lat":30.259244,"lng":120.219375,"count":96}, 
+{"lat":28.213478,"lng":112.979353,"count":99}, 
+{"lat":38.502621,"lng":106.206479,"count":100}, 
+{"lat":22.546054,"lng":114.025974,"count":98}, 
+{"lat":31.249162,"lng":121.487899,"count":94}, 
+{"lat":32.057236,"lng":118.778074,"count":95}];
+   
+    if(!isSupportCanvas()){
+    	alert('热力图目前只支持有canvas支持的浏览器,您所使用的浏览器不能使用热力图功能~')
+    }
+	//详细的参数,可以查看heatmap.js的文档 https://github.com/pa7/heatmap.js/blob/master/README.md
+	//参数说明如下:
+	/* visible 热力图是否显示,默认为true
+     * opacity 热力的透明度,1-100
+     * radius 势力图的每个点的半径大小   
+     * gradient  {JSON} 热力图的渐变区间 . gradient如下所示
+     *	{
+			.2:'rgb(0, 255, 255)',
+			.5:'rgb(0, 110, 255)',
+			.8:'rgb(100, 0, 255)'
+		}
+		其中 key 表示插值的位置, 0~1. 
+		    value 为颜色值. 
+     */
+	heatmapOverlay = new BMapLib.HeatmapOverlay({"radius":15});
+	map.addOverlay(heatmapOverlay);
+	heatmapOverlay.setDataSet({data:points,max:150});
+	//是否显示热力图
+    function openHeatmap(){
+        heatmapOverlay.show();
+    }
+	function closeHeatmap(){
+        heatmapOverlay.hide();
+    }
+	closeHeatmap();
+    function setGradient(){
+     	/*格式如下所示:
+		{
+	  		0:'rgb(102, 255, 0)',
+	 	 	.5:'rgb(255, 170, 0)',
+		  	1:'rgb(255, 0, 0)'
+		}*/
+     	var gradient = {
+		  	1:'rgb(255, 0, 0)'};
+     	var colors = document.querySelectorAll("input[type='color']");
+     	colors = [].slice.call(colors,0);
+     	colors.forEach(function(ele){
+			gradient[ele.getAttribute("data-key")] = ele.value; 
+     	});
+        heatmapOverlay.setOptions({"gradient":gradient});
+    }
+	//判断浏览区是否支持canvas
+    function isSupportCanvas(){
+        var elem = document.createElement('canvas');
+        return !!(elem.getContext && elem.getContext('2d'));
+    }
+	
+	
+	//创建标注点并添加到地图中
+	function addMarker(points) {
+    //循环建立标注点
+    for(var i=0, pointsLen = points.length; i<pointsLen; i++) {
+        var point = new BMap.Point(points[i].lng, points[i].lat); //将标注点转化成地图上的点
+        		// 百度地图API功能
+//	map.centerAndZoom(point, 12);
+	var markerr = new BMap.Marker(point);  // 创建标注
+	map.addOverlay(markerr);              // 将标注添加到地图中
+	var label = new BMap.Label(points[i].count,{offset:new BMap.Size(20,-10)});
+	markerr.setLabel(label);
+		var marker = new BMap.Marker(point); //将点转化成标注点
+        map.addOverlay(marker);  //将标注点添加到地图上
+        //添加监听事件
+        (function() {
+            var thePoint = points[i];
+            marker.addEventListener("click",
+            //显示信息的方法
+                function() {
+                showInfo(this,thePoint);
+            });
+         })();  
+    }
+}
+	function showInfo(thisMarker,point) {
+    //获取点的信息
+    var sContent = 
+    '<ul style="margin:0 0 5px 0;padding:0.2em 0">'  
+    +'<li style="line-height: 26px;font-size: 15px;">'  
+    +'<span style="width: 50px;display: inline-block;">id：</span>' + point.id + '</li>'  
+    +'<li style="line-height: 26px;font-size: 15px;">'  
+    +'<span style="width: 50px;display: inline-block;">名称：</span>' + point.name + '</li>'  
+    +'<li style="line-height: 26px;font-size: 15px;"><span style="width: 50px;display: inline-block;">查看：</span><a href="'+point.url+'">详情</a></li>'  
+    +'</ul>';
+    var infoWindow = new BMap.InfoWindow(sContent); //创建信息窗口对象
+    thisMarker.openInfoWindow(infoWindow); //图片加载完后重绘infoWindow
+}
+//创建地图
+addMarker(points); //添加标注
+
+	
+	function changeMapStyle(style){
+		map.setMapStyle({style:style});
+		$('#desc').html(mapstyles[style].desc);
+	}
+		// 百度地图API功能
+//	map.centerAndZoom(point, 12);
+//	var marker = new BMap.Marker(point);  // 创建标注
+//	map.addOverlay(marker);              // 将标注添加到地图中
+//	var k = new Array(123,333)
+//	for(var i in k){
+//	var label = new BMap.Label(i,{offset:new BMap.Size(20,-10)});
+//	marker.setLabel(label);
+//	}
+
+</script>
